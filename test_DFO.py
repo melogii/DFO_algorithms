@@ -9,24 +9,23 @@ import numpy as np
 
 class TestCalc(unittest.TestCase):
 
-
     def test_f(self):
 
-        self.assertEqual(DFO.f(2), 4)
-        self.assertEqual(DFO.f(-1), 1)
-        self.assertEqual(DFO.f(0), 0)
+        self.assertAlmostEqual(DFO.f(2), 4, places = 8)
+        self.assertAlmostEqual(DFO.f(-1), 1, places = 8)
+        self.assertAlmostEqual(DFO.f(0), 0, places = 8)
 
     def test_g(self):
 
-        self.assertEqual(DFO.g(1,1), np.sqrt(2))
-        self.assertEqual(DFO.g(-1,1), np.sqrt(2))
-        self.assertEqual(DFO.g(-1,-1), np.sqrt(2))
+        self.assertAlmostEqual(DFO.g(1,1), np.sqrt(2), places = 8)
+        self.assertAlmostEqual(DFO.g(-1,1), np.sqrt(2), places = 8)
+        self.assertAlmostEqual(DFO.g(-1,-1), np.sqrt(2), places = 8)
 
     def test_h(self):
 
-        self.assertEqual(DFO.h(1,1,1), 1/2)
-        self.assertEqual(DFO.h(1,0,1), 1)
-        self.assertEqual(DFO.h(-1,-1,0), 1)
+        self.assertAlmostEqual(DFO.h(1,1,1), 1/2, places = 8)
+        self.assertAlmostEqual(DFO.h(1,0,1), 1, places = 8)
+        self.assertAlmostEqual(DFO.h(-1,-1,0), 1, places = 8)
 
     def test_simplex_gradient(self):
 
@@ -36,11 +35,11 @@ class TestCalc(unittest.TestCase):
         
         for t in range(2):
 
-            self.assertAlmostEqual(DFO.simplex_gradient([0, 0], np.array([[2, 2], [1, -2]]), m)[t][0], np.array([[2],[2]])[t][0])
+            self.assertAlmostEqual(DFO.simplex_gradient([0, 0], np.array([[2, 2], [1, -2]]), m)[t][0], np.array([[2],[2]])[t][0], places = 8)
 
         for t in range(2):
 
-            self.assertAlmostEqual(DFO.simplex_gradient([0, 0], np.array([[0.02, 0.02], [0.01, -0.02]]), m)[t][0], np.array([[0.02], [2]])[t][0])
+            self.assertAlmostEqual(DFO.simplex_gradient([0, 0], np.array([[0.02, 0.02], [0.01, -0.02]]), m)[t][0], np.array([[0.02], [2]])[t][0], places = 8)
 
 
     def test_pseudoinverse(self): #- look for a more efficient way of comparing matrices
@@ -66,13 +65,40 @@ class TestCalc(unittest.TestCase):
 
         for t in range(2):
 
-            self.assertAlmostEqual(DFO.gen_simplex_gradient([0, 0], D, m)[t][0], np.array([[0.8160],[0.4080]])[t][0])
+            self.assertAlmostEqual(DFO.gen_simplex_gradient([0, 0], D, m)[t][0], np.array([[0.8160],[0.4080]])[t][0], places = 8)
 
         D = np.array([[0.02, 0.02, -0.02], [0.01, -0.02, -0.01]])
 
         for t in range(2):
 
-            self.assertAlmostEqual(DFO.gen_simplex_gradient([0, 0], D, m)[t][0], np.array([[0.0067],[1.9867]])[t][0])
+            self.assertAlmostEqual(DFO.gen_simplex_gradient([0, 0], D, m)[t][0], np.array([[0.006666666],[1.986666666]])[t][0], places = 8)
+
+
+    def test_gen_simplex_hessian(self):
+
+        def p(x):
+
+            return x[0]*x[0]*x[0] + x[1]*x[1]*x[1] + x[2]*x[2]*x[2]
+        
+        x = np.array([2, -1, 1])
+        
+        D = np.array([[0.1, 0, 0, -0.1, 0], [0, 0.1, -0.1, -0.2, 0.2], [-0.1, 0, 0.1, 0.2, -0.2]])
+
+        D = 0.001 * D
+
+        np.testing.assert_allclose(DFO.gen_simplex_hessian(x, D, D, p),np.array([[12, 0, 0], [0, -6, 0], [0, 0, 6]]), atol=1e-03)
+
+
+        def q(x):
+
+            return x[0]*np.exp(x[0] + x[1])
+        
+        x = np.array([0,0])
+        
+        D = np.array([[0.1, 0], [0, 0.1]])
+
+        np.testing.assert_allclose(DFO.gen_simplex_hessian(x, D, D, q),np.array([[2, 1], [1, 0]]), atol=1e-08)
+
 
 
 

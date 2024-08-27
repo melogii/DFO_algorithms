@@ -263,5 +263,12 @@ def r(x):
 
 #mbsd(1e-2, 1e-3, 1/2, 1e-6, np.array([1, 1]), np.array([[1,0], [0, 1]]), r, 8) # one iteration of line search
 
+def s(x):
+
+    return np.sqrt(pow(x[0],2) + pow(x[1], 2))
+
+#mbsd(1e-2, 1e-3, 1/2, 1e-6, np.array([1, 1]), np.array([[1,0], [0, 1]]), s, 8) # one iteration of line search
+
+
 
 

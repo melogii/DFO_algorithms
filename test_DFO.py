@@ -2,7 +2,7 @@
 
 import unittest
 
-import DFO
+import functions, simp_grad, pseudoinverse, gen_simp_grad, gen_simp_hessian, line_search
 
 import numpy as np
 
@@ -11,21 +11,21 @@ class TestCalc(unittest.TestCase):
 
     def test_f(self):
 
-        self.assertAlmostEqual(DFO.f(2), 4, places = 8)
-        self.assertAlmostEqual(DFO.f(-1), 1, places = 8)
-        self.assertAlmostEqual(DFO.f(0), 0, places = 8)
+        self.assertAlmostEqual(functions.f(2), 4, places = 8)
+        self.assertAlmostEqual(functions.f(-1), 1, places = 8)
+        self.assertAlmostEqual(functions.f(0), 0, places = 8)
 
     def test_g(self):
 
-        self.assertAlmostEqual(DFO.g(1,1), np.sqrt(2), places = 8)
-        self.assertAlmostEqual(DFO.g(-1,1), np.sqrt(2), places = 8)
-        self.assertAlmostEqual(DFO.g(-1,-1), np.sqrt(2), places = 8)
+        self.assertAlmostEqual(functions.g(1,1), np.sqrt(2), places = 8)
+        self.assertAlmostEqual(functions.g(-1,1), np.sqrt(2), places = 8)
+        self.assertAlmostEqual(functions.g(-1,-1), np.sqrt(2), places = 8)
 
     def test_h(self):
 
-        self.assertAlmostEqual(DFO.h(1,1,1), 1/2, places = 8)
-        self.assertAlmostEqual(DFO.h(1,0,1), 1, places = 8)
-        self.assertAlmostEqual(DFO.h(-1,-1,0), 1, places = 8)
+        self.assertAlmostEqual(functions.h(1,1,1), 1/2, places = 8)
+        self.assertAlmostEqual(functions.h(1,0,1), 1, places = 8)
+        self.assertAlmostEqual(functions.h(-1,-1,0), 1, places = 8)
 
     def test_simplex_gradient(self):
 
@@ -35,22 +35,22 @@ class TestCalc(unittest.TestCase):
         
         for t in range(2):
 
-            self.assertAlmostEqual(DFO.simplex_gradient([0, 0], np.array([[2, 2], [1, -2]]), m)[t][0], np.array([[2],[2]])[t][0], places = 8)
+            self.assertAlmostEqual(simp_grad.simplex_gradient([0, 0], np.array([[2, 2], [1, -2]]), m)[t][0], np.array([[2],[2]])[t][0], places = 8)
 
         for t in range(2):
 
-            self.assertAlmostEqual(DFO.simplex_gradient([0, 0], np.array([[0.02, 0.02], [0.01, -0.02]]), m)[t][0], np.array([[0.02], [2]])[t][0], places = 8)
+            self.assertAlmostEqual(simp_grad.simplex_gradient([0, 0], np.array([[0.02, 0.02], [0.01, -0.02]]), m)[t][0], np.array([[0.02], [2]])[t][0], places = 8)
 
 
     def test_pseudoinverse(self): #- look for a more efficient way of comparing matrices
 
         A = np.array([[1/3, 2, 0], [2, -6, 0]])
 
-        np.testing.assert_allclose(DFO.pseudoinverse(A), np.array([[1, 1/3], [1/3, -1/18], [0, 0]]), atol=1e-08)
+        np.testing.assert_allclose(pseudoinverse.pseudoinverse(A), np.array([[1, 1/3], [1/3, -1/18], [0, 0]]), atol=1e-08)
 
         B = np.array([[1/3, 2, 0], [2, -6, 0], [0, 0, -4]])
 
-        np.testing.assert_allclose(DFO.pseudoinverse(B), np.array([[1, 1/3, 0], [1/3, -1/18, 0], [0, 0, -1/4]]), atol=1e-08)
+        np.testing.assert_allclose(pseudoinverse.pseudoinverse(B), np.array([[1, 1/3, 0], [1/3, -1/18, 0], [0, 0, -1/4]]), atol=1e-08)
 
 
     def test_gen_simplex_gradient(self):
@@ -65,13 +65,13 @@ class TestCalc(unittest.TestCase):
 
         for t in range(2):
 
-            self.assertAlmostEqual(DFO.gen_simplex_gradient([0, 0], D, m)[t], np.array([[0.8160],[0.4080]])[t][0], places = 8)
+            self.assertAlmostEqual(gen_simp_grad.gen_simplex_gradient([0, 0], D, m)[t], np.array([[0.8160],[0.4080]])[t][0], places = 8)
 
         D = np.array([[0.02, 0.02, -0.02], [0.01, -0.02, -0.01]])
 
         for t in range(2):
 
-            self.assertAlmostEqual(DFO.gen_simplex_gradient([0, 0], D, m)[t], np.array([[0.006666666],[1.986666666]])[t][0], places = 8)
+            self.assertAlmostEqual(gen_simp_grad.gen_simplex_gradient([0, 0], D, m)[t], np.array([[0.006666666],[1.986666666]])[t][0], places = 8)
 
 
     def test_gen_simplex_hessian(self):
@@ -86,9 +86,9 @@ class TestCalc(unittest.TestCase):
 
         D = 0.0001 * D
 
-        print(np.linalg.norm(DFO.gen_simplex_hessian(x, D, D, p) - np.array([[12, 0, 0], [0, -6, 0], [0, 0, 6]])))
+        print(np.linalg.norm(gen_simp_hessian.gen_simplex_hessian(x, D, D, p) - np.array([[12, 0, 0], [0, -6, 0], [0, 0, 6]])))
 
-        np.testing.assert_allclose(DFO.gen_simplex_hessian(x, D, D, p),np.array([[12, 0, 0], [0, -6, 0], [0, 0, 6]]), atol=1e-02)
+        np.testing.assert_allclose(gen_simp_hessian.gen_simplex_hessian(x, D, D, p),np.array([[12, 0, 0], [0, -6, 0], [0, 0, 6]]), atol=1e-02)
 
         
 
@@ -102,7 +102,7 @@ class TestCalc(unittest.TestCase):
 
         D = 0.001 * D 
 
-        np.testing.assert_allclose(DFO.gen_simplex_hessian(x, D, D, q),np.array([[2, 1], [1, 0]]), atol=1e-02)
+        np.testing.assert_allclose(gen_simp_hessian.gen_simplex_hessian(x, D, D, q),np.array([[2, 1], [1, 0]]), atol=1e-02)
 
 
         def s(x):
@@ -135,7 +135,7 @@ class TestCalc(unittest.TestCase):
             
         # we check the number of iterations taken
 
-        self.assertAlmostEqual(5, DFO.line_search(k, 1, np.array([1]), 1e-6, 10)[1], places = 8)
+        self.assertAlmostEqual(5, line_search.line_search(k, 1, np.array([1]), 1e-6, 10)[1], places = 8)
 
 
         def n(x):
@@ -152,9 +152,8 @@ class TestCalc(unittest.TestCase):
 
                 return 2
             
-        self.assertAlmostEqual(4, DFO.line_search(n, 2, np.array([-1]), 1e-6, 10)[1], places = 8)
+        self.assertAlmostEqual(4, line_search.line_search(n, 2, np.array([-1]), 1e-6, 10)[1], places = 8)
             
-
 
 
 if __name__ == '__main__':

@@ -135,7 +135,6 @@ while stop == False:
 
         print("delta = ", delta, " accuracy for p: ", norm_p, " accuracy for q ", norm_q)
 
-    
     stop = True
 
     
